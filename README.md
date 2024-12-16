@@ -20,18 +20,17 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-1. Annotates Genomes using BAKTA
-2. Runs one of several typing tools if specified
-1. Annotation (BAKTA)
+
+1. Annotation using [BAKTA](https://github.com/oschwengers/bakta)
 2. Typing
-   1. Kleborate → Klebsiella pneumoniae and the Klebsiella pneumoniae species complex (KpSC)
-   2. (stype)/sistr → Salmonella
-   3. meningotype → Neisseria meningitides
-   4. lissero →  Listeria monocytogenes
-   5. ngmaster → Neisseria gonorrhoeae
-   6. ectyper → E. coli
-   7. SaLTy & spaTyper → Staphylococcus aureus
-3. abricate (TO COME)
+   1. [Kleborate](https://github.com/klebgenomics/Kleborate) → Klebsiella pneumoniae and the Klebsiella pneumoniae species complex (KpSC)
+   2. ([stype](https://github.com/MDU-PHL/salmonella_typing))/[sistr](https://github.com/phac-nml/sistr_cmd) → Salmonella
+   3. [meningotype](https://github.com/MDU-PHL/meningotype) → Neisseria meningitides
+   4. [lissero](https://github.com/MDU-PHL/lissero) →  Listeria monocytogenes
+   5. [ngmaster](https://github.com/MDU-PHL/ngmaster) → Neisseria gonorrhoeae
+   6. [ectyper](https://github.com/phac-nml/ecoli_serotyping) → E. coli
+   7. [SaLTy](https://github.com/LanLab/salty) & [spaTyper](https://github.com/HCGB-IGTP/spaTyper) → Staphylococcus aureus
+3. [abricate](https://github.com/tseemann/abricate) (TO COME)
 
 <p align="center"><picture><img src="assets/AnoBac_workflow.png" alt="GARI"></picture></p>
 
