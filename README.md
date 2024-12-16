@@ -8,7 +8,7 @@
 
 ## Introduction
 
-**anno/annorki** is a bioinformatics pipeline that ...
+**ANOBAC?** is a bioinformatics pipeline that *UNDER CONSTRCTION* mroe to come in 2025...
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -20,8 +20,21 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Annotates Genomes using BAKTA
+2. Runs one of several typing tools if specified
+1. Annotation (BAKTA)
+2. Typing
+   1. Kleborate → Klebsiella pneumoniae and the Klebsiella pneumoniae species complex (KpSC)
+   2. (stype)/sistr → Salmonella
+   3. meningotype → Neisseria meningitides
+   4. lissero →  Listeria monocytogenes
+   5. ngmaster → Neisseria gonorrhoeae
+   6. ectyper → E. coli
+   7. SaLTy & spaTyper → Staphylococcus aureus
+3. abricate (TO COME)
+
+<p align="center"><picture><img src="assets/AnoBac_workflow.png" alt="GARI"></picture></p>
+
 
 ## Usage
 
