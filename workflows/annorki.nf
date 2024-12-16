@@ -21,11 +21,6 @@ WorkflowAnnorki.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
@@ -46,18 +41,20 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { BAKTA_BAKTA                 } from '../modules/nf-core/bakta/bakta/main'
+include { KLEBORATE                   } from '../modules/nf-core/kleborate/main.nf'
+include { ECTYPER                     } from '../modules/nf-core/ectyper/main'
+include { MENINGOTYPE                 } from '../modules/nf-core/meningotype/main'
+include { LISSERO                     } from '../modules/nf-core/lissero/main'
+include { NGMASTER                    } from '../modules/nf-core/ngmaster/main'
+include { SISTR                       } from '../modules/nf-core/sistr/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-// Info required for completion email and summary
-def multiqc_report = []
 
 workflow ANNORKI {
 
@@ -66,48 +63,89 @@ workflow ANNORKI {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    INPUT_CHECK (
-        file(params.input)
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    //INPUT_CHECK (
+    //    file(params.input)
+    //)
+    //ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
+    // add items passed in from inputCsv samplesheet
 
-    //
-    // MODULE: Run FastQC
-    //
-    FASTQC (
-        INPUT_CHECK.out.reads
+
+    //if ( params.input ) {
+    //    csv_ch = Channel.fromPath(params.input)
+   //         .splitCsv(header:true)
+    //        .map { row ->
+    //            def metaMap = row.subMap(["sample", "genus", "species"])
+//
+//              // naive boolean parsing
+//                if (metaMap.doBar.toLowerCase() == "true"){
+//                    metaMap.doBar = true
+//                } else {
+//                   metaMap.doBar = false
+//                }
+//
+//               return [ metaMap, file(row.file) ]
+//            }
+
+ //       input_ch = input_ch.mix(csv_ch)
+ //   }
+
+    input_ch = Channel.fromPath((params.input)) \
+        | splitCsv(header:true) \
+        | map {row-> tuple(row.sample, file(row.fasta), row.genus, row.species)}
+
+    input_ch.view()
+    BAKTA_BAKTA(
+        input_ch,
+        params.bakta_db
     )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = ch_versions.mix(BAKTA_BAKTA.out.versions)
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    kleb_input = input_ch.collect().view()
 
-    //
-    // MODULE: MultiQC
-    //
-    workflow_summary    = WorkflowAnnorki.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
+    if (params.typing == "kleborate"){
+        KLEBORATE(
+        input_ch
+        )
+        ch_versions = ch_versions.mix(KLEBORATE.out.versions)
+    }
 
-    methods_description    = WorkflowAnnorki.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
-    ch_methods_description = Channel.value(methods_description)
+    if (params.typing == "ngmaster"){
+        NGMASTER(
+            input_ch
+        )
+        ch_versions = ch_versions.mix(NGMASTER.out.versions)
+    }
 
-    ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    if (params.typing == "ectyper"){
+        ECTYPER(
+            input_ch
+        )
+        ch_versions = ch_versions.mix(ECTYPER.out.versions)
+    }
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
-    )
-    multiqc_report = MULTIQC.out.report.toList()
+    if (params.typing == "lissero"){
+        LISSERO(
+            input_ch
+        )
+        ch_versions = ch_versions.mix(LISSERO.out.versions)
+    }
+
+    if (params.typing == "meningotype"){
+        MENINGOTYPE(
+            input_ch
+        )
+        ch_versions = ch_versions.mix(MENINGOTYPE.out.versions)
+    }
+
+    if (params.typing == "sistr"){
+        SISTR(
+            input_ch
+        )
+        ch_versions = ch_versions.mix(SISTR.out.versions)
+    }
 }
 
 /*

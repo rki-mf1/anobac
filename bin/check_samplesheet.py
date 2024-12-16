@@ -25,16 +25,19 @@ class RowChecker:
     """
 
     VALID_FORMATS = (
-        ".fq.gz",
-        ".fastq.gz",
+        ".fa.gz",
+        ".fasta.gz",
+        ".fa",
+        ".fasta",
+        ".fna"
     )
 
     def __init__(
         self,
         sample_col="sample",
-        first_col="fastq_1",
-        second_col="fastq_2",
-        single_col="single_end",
+        first_col="fasta",
+        second_col="genus",
+        single_col="species",
         **kwargs,
     ):
         """
@@ -71,8 +74,6 @@ class RowChecker:
         """
         self._validate_sample(row)
         self._validate_first(row)
-        self._validate_second(row)
-        self._validate_pair(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
 
@@ -89,21 +90,6 @@ class RowChecker:
             raise AssertionError("At least the first FASTQ file is required.")
         self._validate_fastq_format(row[self._first_col])
 
-    def _validate_second(self, row):
-        """Assert that the second FASTQ entry has the right format if it exists."""
-        if len(row[self._second_col]) > 0:
-            self._validate_fastq_format(row[self._second_col])
-
-    def _validate_pair(self, row):
-        """Assert that read pairs have the same file extension. Report pair status."""
-        if row[self._first_col] and row[self._second_col]:
-            row[self._single_col] = False
-            first_col_suffix = Path(row[self._first_col]).suffixes[-2:]
-            second_col_suffix = Path(row[self._second_col]).suffixes[-2:]
-            if first_col_suffix != second_col_suffix:
-                raise AssertionError("FASTQ pairs must have the same file extensions.")
-        else:
-            row[self._single_col] = True
 
     def _validate_fastq_format(self, filename):
         """Assert that a given filename has one of the expected FASTQ extensions."""
@@ -188,7 +174,7 @@ def check_samplesheet(file_in, file_out):
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
     """
-    required_columns = {"sample", "fastq_1", "fastq_2"}
+    required_columns = {"sample", "fasta", "genus", "species"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
