@@ -88,10 +88,10 @@ class RowChecker:
         """Assert that the first FASTQ entry is non-empty and has the right format."""
         if len(row[self._first_col]) <= 0:
             raise AssertionError("At least the first FASTQ file is required.")
-        self._validate_fastq_format(row[self._first_col])
+        self._validate_fasta_format(row[self._first_col])
 
 
-    def _validate_fastq_format(self, filename):
+    def _validate_fasta_format(self, filename):
         """Assert that a given filename has one of the expected FASTQ extensions."""
         if not any(filename.endswith(extension) for extension in self.VALID_FORMATS):
             raise AssertionError(

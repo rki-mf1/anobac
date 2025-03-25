@@ -4,5 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::ngmaster=0.5.8
-  - conda-forge::python=3.9.7
+  - bioconda::ncbi-amrfinderplus==4.0.19--hf69ffd2_0

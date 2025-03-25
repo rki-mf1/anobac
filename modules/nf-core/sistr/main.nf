@@ -1,5 +1,5 @@
 process SISTR {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -8,7 +8,7 @@ process SISTR {
         'biocontainers/sistr_cmd:1.1.1--pyh864c0ab_2' }"
 
     input:
-    tuple val(meta), path(fasta), val(genus), val(species)
+    tuple val(meta), path(fasta)
 
     output:
     tuple val(meta), path("*.tab")         , emit: tsv
@@ -22,7 +22,7 @@ process SISTR {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def is_compressed = fasta.getName().endsWith(".gz") ? true : false
     def fasta_name = fasta.getName().replace(".gz", "")
     """

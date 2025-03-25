@@ -1,5 +1,5 @@
 process KLEBORATE {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -8,7 +8,7 @@ process KLEBORATE {
         'biocontainers/kleborate:2.1.0--pyhdfd78af_1' }"
 
     input:
-    tuple val(meta), path(fastas), val(genus), val(species)
+    tuple val(meta), path(fastas)
 
     output:
     tuple val(meta), path("*.txt"), emit: txt
@@ -19,7 +19,7 @@ process KLEBORATE {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     kleborate \\
         $args \\
@@ -33,7 +33,7 @@ process KLEBORATE {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.results.txt
 

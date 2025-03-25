@@ -1,19 +1,21 @@
-process ECTYPER {
+process SALTY {
     tag "$meta.id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ectyper:1.0.0--pyhdfd78af_1' :
-        'biocontainers/ectyper:1.0.0--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/salty:1.0.6--pyhdfd78af_0' :
+        'biocontainers/salty:1.0.6--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("*.log"), emit: log
-    tuple val(meta), path("*.tsv"), emit: tsv
-    tuple val(meta), path("*.txt"), emit: txt
+    tuple val(meta), path("*/*_lineage.csv"), emit: lineage
+    tuple val(meta), path("*/*.aln"), emit: aln
+    tuple val(meta), path("*/*.frag.gz"), emit: frag
+    tuple val(meta), path("*/*.fsa"), emit: fsa
+    tuple val(meta), path("*/*.res"), emit: res
     path "versions.yml"           , emit: versions
 
     when:
@@ -29,17 +31,16 @@ process ECTYPER {
         gzip -c -d $fasta > $fasta_name
     fi
 
-    ectyper \\
+    salty \\
         $args \\
-        --cores $task.cpus \\
-        --output ./ \\
-        --input $fasta_name
-
-    mv output.tsv ${prefix}.tsv
+        --t $task.cpus \\
+        --i . \\
+        --o . \\
+        -m -c
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ectyper: \$(echo \$(ectyper --version 2>&1)  | sed 's/.*ectyper //; s/ .*\$//')
+        salty: \$(echo \$(salty --version 2>&1)  | sed 's/.*salty version://; s/ .*\$//')
     END_VERSIONS
     """
 }

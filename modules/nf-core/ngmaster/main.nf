@@ -1,5 +1,5 @@
 process NGMASTER {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -8,7 +8,7 @@ process NGMASTER {
         'biocontainers/ngmaster:0.5.8--pyhdfd78af_1' }"
 
     input:
-    tuple val(meta), path(fasta), val(genus), val(species)
+    tuple val(meta), path(fasta)
 
     output:
     tuple val(meta), path("*.tsv"), emit: tsv
@@ -19,7 +19,7 @@ process NGMASTER {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     ngmaster \\
         $args \\
@@ -34,7 +34,7 @@ process NGMASTER {
 
     stub:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.tsv
 
