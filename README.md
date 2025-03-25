@@ -30,7 +30,7 @@
    5. [ngmaster](https://github.com/MDU-PHL/ngmaster) → Neisseria gonorrhoeae
    6. [ectyper](https://github.com/phac-nml/ecoli_serotyping) → E. coli
    7. [SaLTy](https://github.com/LanLab/salty) & [spaTyper](https://github.com/HCGB-IGTP/spaTyper) → Staphylococcus aureus
-3. [abricate](https://github.com/tseemann/abricate) (TO COME)
+3. [amrfinderplus](https://github.com/ncbi/amr)
 
 <p align="center"><picture><img src="assets/AnoBac_workflow.png" alt="GARI"></picture></p>
 
