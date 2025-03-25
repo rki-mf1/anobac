@@ -28,15 +28,15 @@
                     "description": "Path to a local copy of the bakta database to be used for annotation.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "amrfinder_db": {
+                    "type": "string",
+                    "description": "Path to a local copy of the amrfinderplus database to be used.",
+                    "fa_icon": "fas fa-folder-open"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
-                },
-                "typing": {
-                    "type": "string",
-                    "description": "Defines which typing tool to run [options: kleborate, ngmaster, lissero, meningotype, ectyper, sistr].",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "email": {

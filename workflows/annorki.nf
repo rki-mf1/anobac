@@ -31,6 +31,8 @@ WorkflowAnnorki.initialise(params, log)
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { SALTY       } from '../modules/local/salty/main'
+include { SUMMARIZE_REPORTS       } from '../modules/local/summarizeReports/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,6 +52,9 @@ include { MENINGOTYPE                 } from '../modules/nf-core/meningotype/mai
 include { LISSERO                     } from '../modules/nf-core/lissero/main'
 include { NGMASTER                    } from '../modules/nf-core/ngmaster/main'
 include { SISTR                       } from '../modules/nf-core/sistr/main'
+include { AMRFINDERPLUS_RUN           } from '../modules/nf-core/amrfinderplus/run/main'
+include { SPATYPER                    } from '../modules/nf-core/spatyper/main'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -63,10 +68,12 @@ workflow ANNORKI {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    //INPUT_CHECK (
-    //    file(params.input)
-    //)
-    //ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    INPUT_CHECK (
+        file(params.input)
+    )
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    input_ch = INPUT_CHECK.out.assembly
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
@@ -92,60 +99,83 @@ workflow ANNORKI {
  //       input_ch = input_ch.mix(csv_ch)
  //   }
 
-    input_ch = Channel.fromPath((params.input)) \
-        | splitCsv(header:true) \
-        | map {row-> tuple(row.sample, file(row.fasta), row.genus, row.species)}
+    //input_ch = Channel.fromPath((params.input)) \
+    //    | splitCsv(header:true) \
+    //    | map {row-> tuple(row.sample, file(row.fasta), row.genus, row.species)}
 
-    input_ch.view()
     BAKTA_BAKTA(
         input_ch,
-        params.bakta_db
+        params.bakta_db,
+        [],
+        []
     )
     ch_versions = ch_versions.mix(BAKTA_BAKTA.out.versions)
 
-    kleb_input = input_ch.collect().view()
+    // seperate channel for different species to run typing tools
+    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_gonorrhoeae" }.set { ch_neg }
+    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_meningitidis" }.set { ch_nei }
+    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Listeria_monocytogenes" }.set { ch_lis }
+    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Klebsiella_pneumoniae" }.set { ch_kp }
+    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Escherichia_coli" }.set { ch_ec }
+    input_ch.filter { meta, fasta -> meta.genus=="Salmonella" }.set { ch_sal }
+    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Staphylococcus_aureus" }.set { ch_mra }
 
-    if (params.typing == "kleborate"){
-        KLEBORATE(
-        input_ch
-        )
-        ch_versions = ch_versions.mix(KLEBORATE.out.versions)
-    }
+    KLEBORATE(
+        ch_kp
+    )
+    ch_versions = ch_versions.mix(KLEBORATE.out.versions)
+    NGMASTER(
+        ch_neg
+    )
+    //ngmaster_sum = NGMASTER.out.tsv.collect()
+    //SUMMARIZE_REPORTS(
+    //    ngmaster_sum,
+    //    "ngmaster"
+    //)
 
-    if (params.typing == "ngmaster"){
-        NGMASTER(
-            input_ch
-        )
-        ch_versions = ch_versions.mix(NGMASTER.out.versions)
-    }
+    ch_versions = ch_versions.mix(NGMASTER.out.versions)
+    ECTYPER(
+        ch_ec
+    )
+    ch_versions = ch_versions.mix(ECTYPER.out.versions)
+    LISSERO(
+        ch_lis
+    )
+    ch_versions = ch_versions.mix(LISSERO.out.versions)
+    MENINGOTYPE(
+        ch_nei
+    )
+    ch_versions = ch_versions.mix(MENINGOTYPE.out.versions)
+    SISTR(
+        ch_sal
+    )
+    ch_versions = ch_versions.mix(SISTR.out.versions)
+    SALTY(
+        ch_mra
+    )
+    ch_versions = ch_versions.mix(SALTY.out.versions)
+    //salty_sum = SALTY.out.lineage.collect()
+    //SUMMARIZE_REPORTS(
+    //    salty_sum,
+    //    "salty"
+    //)
+    SPATYPER(
+        ch_mra,
+        [],
+        []
+    )
+    ch_versions = ch_versions.mix(SPATYPER.out.versions)
+    //spatyper_sum = SPATYPER.out.tsv.collect()
+    //SUMMARIZE_REPORTS(
+    //    spatyper_sum,
+    //    "spatyper"
+    //)
 
-    if (params.typing == "ectyper"){
-        ECTYPER(
-            input_ch
-        )
-        ch_versions = ch_versions.mix(ECTYPER.out.versions)
-    }
-
-    if (params.typing == "lissero"){
-        LISSERO(
-            input_ch
-        )
-        ch_versions = ch_versions.mix(LISSERO.out.versions)
-    }
-
-    if (params.typing == "meningotype"){
-        MENINGOTYPE(
-            input_ch
-        )
-        ch_versions = ch_versions.mix(MENINGOTYPE.out.versions)
-    }
-
-    if (params.typing == "sistr"){
-        SISTR(
-            input_ch
-        )
-        ch_versions = ch_versions.mix(SISTR.out.versions)
-    }
+    AMRFINDERPLUS_RUN(
+        input_ch,
+        params.amrfinder_db
+    )
+    ch_versions = ch_versions.mix(AMRFINDERPLUS_RUN.out.versions)
 }
 
 /*

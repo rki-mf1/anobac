@@ -1,15 +1,17 @@
 process BAKTA_BAKTA {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bakta:1.9.3--pyhdfd78af_0' :
-        'biocontainers/bakta:1.9.3--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/bakta:1.10.4--pyhdfd78af_0' :
+        'biocontainers/bakta:1.10.4--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta), path(fasta), val(genus), val(species)
+    tuple val(meta), path(fasta)
     path db
+    path proteins
+    path prodigal_tf
 
     output:
     //tuple val(meta), path("${prefix}.embl")             , emit: embl
@@ -19,7 +21,7 @@ process BAKTA_BAKTA {
     tuple val(meta), path("${prefix}.gbff")             , emit: gbff
     tuple val(meta), path("${prefix}.gff3")             , emit: gff
     //tuple val(meta), path("${prefix}.hypotheticals.tsv"), emit: hypotheticals_tsv
-    ////tuple val(meta), path("${prefix}.hypotheticals.faa"), emit: hypotheticals_faa
+    //tuple val(meta), path("${prefix}.hypotheticals.faa"), emit: hypotheticals_faa
     //tuple val(meta), path("${prefix}.tsv")              , emit: tsv
     //tuple val(meta), path("${prefix}.txt")              , emit: txt
     path "versions.yml"                                 , emit: versions
@@ -29,17 +31,19 @@ process BAKTA_BAKTA {
 
     script:
     def args = task.ext.args   ?: ''
-    prefix   = task.ext.prefix ?: "${meta}"
-    b_genus  = genus ? "--genus ${genus}" : ""
-    b_species = species ? "--species ${species}" : ""
-
-
+    prefix   = task.ext.prefix ?: "${meta.id}"
+    def proteins_opt = proteins ? "--proteins ${proteins[0]}" : ""
+    def prodigal_tf = prodigal_tf ? "--prodigal-tf ${prodigal_tf[0]}" : ""
+    def b_genus  = meta.genus ? "--genus ${meta.genus}" : ""
+    def b_species = meta.species ? "--species ${meta.species}" : ""
     """
     bakta \\
         $fasta \\
         $args \\
         --threads $task.cpus \\
         --prefix $prefix \\
+        $proteins_opt \\
+        $prodigal_tf \\
         $b_genus \\
         $b_species \\
         --db $db
@@ -51,18 +55,18 @@ process BAKTA_BAKTA {
     """
 
     stub:
-    prefix = task.ext.prefix ?: "${meta}"
+    prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.embl
-    touch ${prefix}.faa
-    touch ${prefix}.ffn
-    touch ${prefix}.fna
+    //touch ${prefix}.embl
+    //touch ${prefix}.faa
+    //touch ${prefix}.ffn
+    //touch ${prefix}.fna
     touch ${prefix}.gbff
     touch ${prefix}.gff3
-    touch ${prefix}.hypotheticals.tsv
-    touch ${prefix}.hypotheticals.faa
-    touch ${prefix}.tsv
-    touch ${prefix}.txt
+    //touch ${prefix}.hypotheticals.tsv
+    //touch ${prefix}.hypotheticals.faa
+    //touch ${prefix}.tsv
+    //touch ${prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
