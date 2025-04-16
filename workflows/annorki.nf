@@ -32,7 +32,6 @@ WorkflowAnnorki.initialise(params, log)
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { SALTY       } from '../modules/local/salty/main'
-include { SUMMARIZE_REPORTS       } from '../modules/local/summarizeReports/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,11 +126,6 @@ workflow ANNORKI {
     NGMASTER(
         ch_neg
     )
-    //ngmaster_sum = NGMASTER.out.tsv.collect()
-    //SUMMARIZE_REPORTS(
-    //    ngmaster_sum,
-    //    "ngmaster"
-    //)
 
     ch_versions = ch_versions.mix(NGMASTER.out.versions)
     ECTYPER(
