@@ -29,6 +29,8 @@ process ECTYPER {
         gzip -c -d $fasta > $fasta_name
     fi
 
+    touch blast_output_alleles.txt
+
     ectyper \\
         $args \\
         --cores $task.cpus \\
@@ -36,6 +38,8 @@ process ECTYPER {
         --input $fasta_name
 
     mv output.tsv ${prefix}.tsv
+    mv blast_output_alleles.txt ${prefix}_blast_output_alleles.txt
+    mv ectyper.log ${prefix}_ectyper.log
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
