@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::kleborate=2.1.0
+  - bioconda::kleborate=3.2.0--pyhdfd78af_0

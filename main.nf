@@ -39,13 +39,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ANNORKI } from './workflows/annorki'
+include { ANOBAC } from './workflows/anobac'
 
 //
 // WORKFLOW: Run main anno/annorki analysis pipeline
 //
-workflow ANNO_ANNORKI {
-    ANNORKI ()
+workflow RUN_ANOBAC {
+    ANOBAC ()
 }
 
 /*
@@ -59,7 +59,7 @@ workflow ANNO_ANNORKI {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    ANNO_ANNORKI ()
+    RUN_ANOBAC ()
 }
 
 /*

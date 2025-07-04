@@ -8,17 +8,24 @@ process SUMMARIZE_REPORTS {
 
     input:
         file ('*')
-        path prefix
+        val prefix
 
     output:
-        path '*.csv'
+        path '*.csv', emit: summary
         path "versions.yml", emit: versions
 
     script:
     """
-    summarizeReports.py \\
-        --t . \\
-        --p $outdir
+    if [[ $prefix == "salty" ]]; then
+        summarizeReports.py \\
+            --t . \\
+            --o $prefix \\
+            --c
+    else
+        summarizeReports.py \\
+            --t . \\
+            --o $prefix
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

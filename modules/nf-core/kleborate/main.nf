@@ -4,14 +4,16 @@ process KLEBORATE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/kleborate:2.1.0--pyhdfd78af_1' :
-        'biocontainers/kleborate:2.1.0--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/kleborate:3.2.0--pyhdfd78af_0' :
+        'biocontainers/kleborate:3.2.0--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(fastas)
+    val preset
 
     output:
-    tuple val(meta), path("*.txt"), emit: txt
+    tuple val(meta), path("*_kleborate_results.txt"), emit: txt
+    //tuple val(meta), path("*_hAMRonization_output.txt"), emit: amr
     path "versions.yml"           , emit: versions
 
     when:
@@ -23,8 +25,12 @@ process KLEBORATE {
     """
     kleborate \\
         $args \\
-        --outfile ${prefix}.results.txt \\
-        --assemblies $fastas
+        --outdir . \\
+        --assemblies $fastas \\
+        --preset $preset
+
+    mv *_output.txt ${prefix}_kleborate_results.txt
+    #mv *_hAMRonization_output.txt ${prefix}_hAMRonization_output.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
