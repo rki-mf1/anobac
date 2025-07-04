@@ -4,8 +4,8 @@ process SISTR {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/sistr_cmd:1.1.1--pyh864c0ab_2':
-        'biocontainers/sistr_cmd:1.1.1--pyh864c0ab_2' }"
+        'https://depot.galaxyproject.org/singularity/sistr_cmd:1.1.3--pyhdc42f0e_0':
+        'biocontainers/sistr_cmd:1.1.3--pyhdc42f0e_2' }"
 
     input:
     tuple val(meta), path(fasta)

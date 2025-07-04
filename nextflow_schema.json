@@ -33,6 +33,11 @@
                     "description": "Path to a local copy of the amrfinderplus database to be used.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "ngmaster_db": {
+                    "type": "string",
+                    "description": "Path to a local copy of the ngmaster database to be used.",
+                    "fa_icon": "fas fa-folder-open"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

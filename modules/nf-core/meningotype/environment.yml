@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::meningotype=0.8.5
+  - bioconda::meningotype=0.8.4

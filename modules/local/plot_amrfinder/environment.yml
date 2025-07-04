@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::r-base
+  - conda-forge::r-tidyverse==1.2.1

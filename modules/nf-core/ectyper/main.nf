@@ -4,8 +4,8 @@ process ECTYPER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ectyper:1.0.0--pyhdfd78af_1' :
-        'biocontainers/ectyper:1.0.0--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/ectyper:2.0.0--pyhdfd78af_4' :
+        'biocontainers/ectyper:2.0.0--pyhdfd78af_4' }"
 
     input:
     tuple val(meta), path(fasta)
@@ -39,7 +39,7 @@ process ECTYPER {
 
     mv output.tsv ${prefix}.tsv
     mv blast_output_alleles.txt ${prefix}_blast_output_alleles.txt
-    mv ectyper.log ${prefix}_ectyper.log
+    mv ectyper.log ${prefix}_lectyper.log
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

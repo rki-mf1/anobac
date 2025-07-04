@@ -1,11 +1,12 @@
 process MENINGOTYPE {
     tag "$meta.id"
     label 'process_low'
+    label 'error_ignore'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/meningotype:0.8.5--pyhdfd78af_0' :
-        'biocontainers/meningotype:0.8.5--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/meningotype:0.8.4--py_1' :
+        'biocontainers/meningotype:0.8.4--py_1' }"
 
     input:
     tuple val(meta), path(fasta)

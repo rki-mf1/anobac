@@ -74,7 +74,7 @@ class RowChecker:
         """
         self._validate_sample(row)
         self._validate_first(row)
-        self._seen.add((row[self._sample_col], row[self._first_col]))
+        self._seen.add((row[self._sample_col]))
         self.modified.append(row)
 
     def _validate_sample(self, row):
@@ -108,12 +108,13 @@ class RowChecker:
 
         """
         if len(self._seen) != len(self.modified):
-            raise AssertionError("The pair of sample name and FASTQ must be unique.")
+            #raise AssertionError("The pair of sample name and FASTQ must be unique.")
+            raise AssertionError("Samplename must be unique.")
         seen = Counter()
         for row in self.modified:
             sample = row[self._sample_col]
             seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
+            #row[self._sample_col] = f"{sample}_T{seen[sample]}"
 
 
 def read_head(handle, num_lines=10):
