@@ -43,6 +43,12 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "tmp_dir": {
+                    "type": "string",
+                    "default": "/tmp/",
+                    "description": "tmp to use for some processes",
+                    "fa_icon": "fas fa-file-csv"
                 }
             }
         },

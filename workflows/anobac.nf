@@ -73,7 +73,6 @@ include { NGMASTER                    } from '../modules/nf-core/ngmaster/main'
 include { SISTR                       } from '../modules/nf-core/sistr/main'
 include { AMRFINDERPLUS_RUN           } from '../modules/nf-core/amrfinderplus/run/main'
 include { SPATYPER                    } from '../modules/nf-core/spatyper/main'
-include { PLASMIDFINDER               } from '../modules/nf-core/plasmidfinder/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,30 +97,6 @@ workflow ANOBAC {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
     // add items passed in from inputCsv samplesheet
-
-
-    //if ( params.input ) {
-    //    csv_ch = Channel.fromPath(params.input)
-   //         .splitCsv(header:true)
-    //        .map { row ->
-    //            def metaMap = row.subMap(["sample", "genus", "species"])
-//
-//              // naive boolean parsing
-//                if (metaMap.doBar.toLowerCase() == "true"){
-//                    metaMap.doBar = true
-//                } else {
-//                   metaMap.doBar = false
-//                }
-//
-//               return [ metaMap, file(row.file) ]
-//            }
-
- //       input_ch = input_ch.mix(csv_ch)
- //   }
-
-    //input_ch = Channel.fromPath((params.input)) \
-    //    | splitCsv(header:true) \
-    //    | map {row-> tuple(row.sample, file(row.fasta), row.genus, row.species)}
 
     BAKTA_BAKTA(
         input_ch,
@@ -282,11 +257,6 @@ workflow ANOBAC {
         file(params.input)
     )
 
-
-    PLASMIDFINDER(
-        input_ch
-    )
-    ch_versions = ch_versions.mix(PLASMIDFINDER.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
