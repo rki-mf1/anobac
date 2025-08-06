@@ -8,7 +8,7 @@
 
 ## Introduction
 
-**AnoBac?** is a bioinformatics pipeline to annotate and type a variaty of bacterial pathogens. Generic modules for annotation as well as AMR/virulence assessment can be run for any given bacterial genome. While for certain species (or genus in case of Salmonella) specific typing modules are executed. Additionally species information can be used to improve annotation and AMR detection if supported by tools used.
+**AnoBac** is a bioinformatics pipeline to annotate and type a variaty of bacterial pathogens. Generic modules for annotation as well as AMR/virulence assessment can be run for any given bacterial genome. While for certain species (or genus in case of Salmonella) specific typing modules are executed. Additionally species information can be used to improve annotation and AMR detection if supported by tools used.
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
