@@ -12,8 +12,9 @@ process KLEBORATE {
     val preset
 
     output:
-    tuple val(meta), path("*_kleborate_results.txt"), emit: txt
-    //tuple val(meta), path("*_hAMRonization_output.txt"), emit: amr
+    tuple val(meta), path("results/*_kleborate_results.txt"), emit: txt
+    tuple val(meta), path("results/*_hAMRonization_output.txt"), emit: amr
+    tuple val(meta), path("results/*_kleborate_stdout.txt"), emit: stout
     path "versions.yml"           , emit: versions
 
     when:
@@ -23,14 +24,19 @@ process KLEBORATE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+
+    export MPLCONFIGDIR=$params.tmp_dir
+    mkdir results
+
     kleborate \\
         $args \\
         --outdir . \\
         --assemblies $fastas \\
-        --preset $preset
-
-    mv *_output.txt ${prefix}_kleborate_results.txt
-    #mv *_hAMRonization_output.txt ${prefix}_hAMRonization_output.txt
+        --preset $preset \\
+        > results/${prefix}_kleborate_stdout.txt
+    
+    cp klebsiella_pneumo_complex_output.txt results/${prefix}_kleborate_results.txt
+    cp klebsiella_pneumo_complex_hAMRonization_output.txt results/${prefix}_hAMRonization_output.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
