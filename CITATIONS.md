@@ -35,6 +35,18 @@
 - [ECTyper](https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000728)
   > Bessonov, Kyrylo, Chad Laing, James Robertson, Irene Yong, Kim Ziebell, Victor PJ Gannon, Anil Nichani, Gitanjali Arya, John HE Nash, and Sara Christianson. "ECTyper: in silico Escherichia coli serotype and species prediction from raw and assembled whole-genome sequence data." Microbial genomics 7, no. 12 (2021): 000728. https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000728
 
+- [LisSero](https://github.com/MDU-PHL/lissero)
+  > In silico serogroup typing prediction for Listeria monocytogenes  
+  > GitHub: https://github.com/MDU-PHL/lissero
+
+- [SaLTy](https://github.com/LanLab/salty)
+  > Staphylococcus aureus Lineage Typer  
+  > GitHub: https://github.com/LanLab/salty
+
+- [spaTyper](https://github.com/HCGB-IGTP/spaTyper) 
+  > Generate spa type identification  
+  > GitHub: https://github.com/HCGB-IGTP/spaTyper
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
