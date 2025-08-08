@@ -52,7 +52,7 @@ nextflow pull rki-mf1/anobac
 # check the available release versions and development branches
 nextflow info rki-mf1/anobac
 # select a recent release and run
-nextflow run rki-mf1/anobac -r v0.1 -profile <singularity, docker, conda, mamba> -params-file params.yaml
+nextflow run rki-mf1/anobac -r v0.1.0 -profile <singularity, docker, conda, mamba> -params-file params.yaml
 ```
 
 Another option is to clone the repository and run the pipeline but we recommend using the `nextflow pull` option and stable release versions via `-r`.
