@@ -4,9 +4,12 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![Launch on Nextflow Tower](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Nextflow%20Tower-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/anno/annorki)
 
+# AnoBac
+
 ## Introduction
 
-**AnoBac** is a bioinformatics pipeline to annotate and type a variaty of bacterial pathogens. Generic modules for annotation as well as AMR/virulence assessment can be run for any given bacterial genome. While for certain species (or genus in case of Salmonella) specific typing modules are executed. Additionally species information can be used to improve annotation and AMR detection if supported by tools used.
+**AnoBac** is a bioinformatics pipeline to annotate and type a variety of bacterial pathogens. This includes generic modules for the annotation as well as AMR/virulence assessment which can run for any given bacterial genome. For certain public-health relevant species (or genera such as *Salmonella*) additional typing modules are executed. Species information can be used to improve annotation and AMR prediction if supported by the incorporated tools.
+
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -18,19 +21,19 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-
-1. Annotation using [BAKTA](https://github.com/oschwengers/bakta)
+## General Workflow
+1. Annotation - [Bakta](https://github.com/oschwengers/bakta)
 2. Typing
-   1. [Kleborate](https://github.com/klebgenomics/Kleborate) → Klebsiella pneumoniae and the Klebsiella pneumoniae species complex (KpSC)
-   2. ([stype](https://github.com/MDU-PHL/salmonella_typing))/[sistr](https://github.com/phac-nml/sistr_cmd) → Salmonella
-   3. [meningotype](https://github.com/MDU-PHL/meningotype) → Neisseria meningitides
-   4. [lissero](https://github.com/MDU-PHL/lissero) →  Listeria monocytogenes
-   5. [ngmaster](https://github.com/MDU-PHL/ngmaster) → Neisseria gonorrhoeae
-   6. [ectyper](https://github.com/phac-nml/ecoli_serotyping) → E. coli
-   7. [SaLTy](https://github.com/LanLab/salty) & [spaTyper](https://github.com/HCGB-IGTP/spaTyper) → Staphylococcus aureus
-3. AMR & Virulence prediction using [AMRFinderPlus](https://github.com/ncbi/amr)
+   1. [Kleborate](https://github.com/klebgenomics/Kleborate) → for *Klebsiella pneumoniae* species complex (KpSC)
+   2. [SISTR](https://github.com/phac-nml/sistr_cmd) → for *Salmonella*
+   3. [meningotype](https://github.com/MDU-PHL/meningotype) → for *Neisseria meningitides*
+   4. [LisSero](https://github.com/MDU-PHL/lissero) → for *Listeria monocytogenes*
+   5. [ngmaster](https://github.com/MDU-PHL/ngmaster) → for *Neisseria gonorrhoeae*
+   6. [ECTyper](https://github.com/phac-nml/ecoli_serotyping) → for *Escherichia coli*
+   7. [SaLTy](https://github.com/LanLab/salty) & [spaTyper](https://github.com/HCGB-IGTP/spaTyper) → for *Staphylococcus aureus*
+3. AMR & Virulence prediction - [AMRFinderPlus](https://github.com/ncbi/amr)
 
-<p align="center"><picture><img src="assets/AnoBac_workflow.png" alt="GARI"></picture></p>
+<p align="center"><picture><img src="assets/AnoBac_workflow.png" alt="AnoBac"></picture></p>
 
 
 ## Usage
@@ -80,19 +83,20 @@ When executing the pipeline on a HPC with a queuing system you might want to lim
 |---|---|---|---|---|
 | input | YES | path to input samplesheet in csv format (more detailed explanation below) | string | null |
 | outdir | YES | path to output directory | string | null |
-| bakta_db | YES | path to predownloaded BAKTA database to use for annotation | string | null |
+| bakta_db | YES | path to predownloaded Bakta database to use for annotation | string | null |
 | amrfinder_db | YES | path to predownloaded AMRFinderPlus database | string | null |
 | ngmaster_db | NO | path to predownloaded ngmaster database | string | [] |
-| setup_dbs | NO | set to true to donly download bakta and AMRFinderPlus databases (no analysis is performed) | boolean | false |
+| setup_dbs | NO | set to true to only download Bakta and AMRFinderPlus databases (no analysis is performed) | boolean | false |
 | tmp_dir | NO | path to temp directory (used for some processes) | string | /tmp/ |
 | publish_dir_mode | NO |---| string | 'copy' |
 
 ### Detailed walkthrough
 
 #### Database setup
-To run AnoBac a local copy of a BAKTA and AMRFinderPlus database are required. This can be done directly with AnoBac by setting the **setup_dbs** parameter to true. In this case only the databases will be downloaded and no further analysis is perfomed. Since especially the BAKTA database is quite big (and takes long to download) this is kept as a separate process from the analysis to avoid redownloading. So ideally this is run as a one time setup and the databases can be reused later on.
+To run AnoBac, a local copy of the Bakta and AMRFinderPlus databases are required. The setup of these can be directly performed within AnoBac by setting the **setup_dbs** parameter to 'true' and running AnoBac. In this case, only the databases will be downloaded and no further analyses are perfomed. Since the Bakta database is quite large (and takes long to download), this is kept as a separate process from the analysis to avoid redownloading. Ideally this process is therefore run as a one-time setup and the databases can be reused later on.
 
-**NOTE** since (currently) the other inputs (input, output, bakta_db, amrfinder_db) are mandatory you would also need to specify some value even if no analysis is performed. While the parameters bakta_db and amrfinder_db can be filled with random placeholders the input samplesheet needs to be a file that exists (even though the content does not matter for the database download).
+
+**NOTE** since (currently) the other inputs (input, output, bakta_db, amrfinder_db) are mandatory, they require to specify a value even if no analysis is performed. While the parameters 'bakta_db' and 'amrfinder_db' can be filled with random placeholders, the input samplesheet requires to be a file that exists (even though the content does not matter for the database download).
 
 Here is a minimum example of a params file with the required parameters to download the databases:
 
@@ -105,9 +109,9 @@ amrfinder_db: 'test'
 ```
 
 #### Input samplesheet
-After the databases are setup, prepare a samplesheet with your **input** data that looks as follows, with each row representing a sample via a genome assembly:
+After database setup, prepare a samplesheet with your **input** data that looks as follows, with each row representing a sample via a genome assembly:
 `samplesheet.csv`:
-```csv
+```
 sample,fasta,genus,species
 S1,/path/to/S1.fasta,Escherichia,coli
 S2,/path/to/S2.fasta,Acinetobacter,baumannii
@@ -120,9 +124,7 @@ S8,/path/to/S2.fasta,Salmonella,
 S9,/path/to/S2.fasta,,
 ...
 ```
-Genus and species information are optional and can be omitted if unknown. But it its recommended to include it if available, as the execution of specific typing tools are dependend on it as shown in the workflow visualization. Additonally genus and species information can be used to improve annotation as well as AMR prediction (if the species is supported by the tools).
-
-
+Genus and species information are optional and can be omitted if unknown. But it its recommended to include it if available, as the execution of specific typing tools are dependend on it (as shown in the workflow visualization). Additonally, genus and species information can be used to improve annotation as well as AMR prediction if the species is supported by the incorporated tools.
 
 
 ## Credits
@@ -166,14 +168,21 @@ This pipeline uses code and infrastructure developed and maintained by the [nf-c
 >
 > Wyres, KL. et al. Identification of Klebsiella capsule synthesis loci from whole genome data. Microbial Genomics (2016). http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000102
 >
+> Bessonov, Kyrylo, Chad Laing, James Robertson, Irene Yong, Kim Ziebell, Victor PJ Gannon, Anil Nichani, Gitanjali Arya, John HE Nash, and Sara Christianson. "ECTyper: in silico Escherichia coli serotype and species prediction from raw and assembled whole-genome sequence data." Microbial genomics 7, no. 12 (2021): 000728. https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000728
+>
 > Kwong JC, Gonçalves da Silva A, Stinear TP, Howden BP, Seemann T.
-meningotype: in silico typing for Neisseria meningitidis.
+meningotype: in silico typing for Neisseria meningitidis.  
 GitHub https://github.com/MDU-PHL/meningotype
 >
 > Kwong JC, Goncalves da Silva A, Howden BP and Seemann T.
-NGMASTER: in silico multi-antigen sequence typing for Neisseria gonorrhoeae (NG-MAST)
+NGMASTER: in silico multi-antigen sequence typing for Neisseria gonorrhoeae (NG-MAST)  
 GitHub: https://github.com/MDU-PHL/ngmaster
 >
-> Bessonov, Kyrylo, Chad Laing, James Robertson, Irene Yong, Kim Ziebell, Victor PJ Gannon, Anil Nichani, Gitanjali Arya, John HE Nash, and Sara Christianson. "ECTyper: in silico Escherichia coli serotype and species prediction from raw and assembled whole-genome sequence data." Microbial genomics 7, no. 12 (2021): 000728. https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000728
+> LisSero: In silico serogroup typing prediction for Listeria monocytogenes  
+> GitHub: https://github.com/MDU-PHL/lissero
 >
+> Staphylococcus aureus Lineage Typer (SaLTy)   
+> GitHub: https://github.com/LanLab/salty
 >
+> spaTyper: Generate spa type identification  
+> GitHub: https://github.com/HCGB-IGTP/spaTyper
