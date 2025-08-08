@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::bakta==1.11.3--pyhdfd78af_0
+  - bioconda::ncbi-amrfinderplus==4.0.23--hf69ffd2_0
