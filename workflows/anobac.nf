@@ -73,6 +73,8 @@ include { NGMASTER                    } from '../modules/nf-core/ngmaster/main'
 include { SISTR                       } from '../modules/nf-core/sistr/main'
 include { AMRFINDERPLUS_RUN           } from '../modules/nf-core/amrfinderplus/run/main'
 include { SPATYPER                    } from '../modules/nf-core/spatyper/main'
+include { BAKTA_BAKTADBDOWNLOAD       } from '../modules/nf-core/bakta/baktadbdownload/main'
+include { AMRFINDERPLUS_UPDATE        } from '../modules/nf-core/amrfinderplus/update/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,178 +86,192 @@ workflow ANOBAC {
 
     ch_versions = Channel.empty()
 
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-    INPUT_CHECK (
-        file(params.input)
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    input_ch = INPUT_CHECK.out.assembly
 
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema
-    // add items passed in from inputCsv samplesheet
+    // if run in setup up mode just download dbs for AMRFINDERPLUS and BAKTA
+    if (params.setup_dbs==true){
 
-    BAKTA_BAKTA(
-        input_ch,
-        params.bakta_db,
-        [],
-        []
-    )
-    ch_versions = ch_versions.mix(BAKTA_BAKTA.out.versions)
+        BAKTA_BAKTADBDOWNLOAD()
+        ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
 
-    PLOT_BAKTA(
-        BAKTA_BAKTA.out.txt.collect(),
-        file(params.input)
-    )
-
-    // seperate channel for different species to run typing tools
-    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_gonorrhoeae" }.set { ch_neg }
-    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_meningitidis" }.set { ch_nei }
-    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Listeria_monocytogenes" }.set { ch_lis }
-    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Klebsiella_pneumoniae" }.set { ch_kp }
-    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Escherichia_coli" }.set { ch_ec }
-    input_ch.filter { meta, fasta -> meta.genus=="Salmonella" }.set { ch_sal }
-    input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Staphylococcus_aureus" }.set { ch_mra }
-
-    // KLEBORATE
-    KLEBORATE(
-        ch_kp,
-        "kpsc"
-    )
-    ch_versions = ch_versions.mix(KLEBORATE.out.versions)
-    kleborate_sum = KLEBORATE.out.txt.collect()
-    SUMMARIZE_REPORTS1(
-        kleborate_sum,
-        "kleborate_kpsc"
-    )
-    PLOT_KLEBORATE(
-        SUMMARIZE_REPORTS1.out.summary
-    )
-
-    // NGMASTER
-    NGMASTER(
-        ch_neg,
-        params.ngmaster_db
-    )
-    ch_versions = ch_versions.mix(NGMASTER.out.versions)
-    ngmaster_sum = NGMASTER.out.tsv.collect()
-    SUMMARIZE_REPORTS2(
-        ngmaster_sum,
-        "ngmaster"
-    )
-    PLOT_NGMASTER(
-        SUMMARIZE_REPORTS2.out.summary
-    )
-
-    // ECTYPER
-    ECTYPER(
-        ch_ec
-    )
-    ch_versions = ch_versions.mix(ECTYPER.out.versions)
-    ectyper_sum = ECTYPER.out.tsv.collect()
-    SUMMARIZE_REPORTS3(
-        ectyper_sum,
-        "ectyper"
-    )
-    PLOT_ECTYPER(
-        SUMMARIZE_REPORTS3.out.summary
-    )
-    //KLEBORATE_EC(
-    //    ch_ec,
-    //    "escherichia"
-    //)
-    //kleborate_ec_sum = KLEBORATE_EC.out.txt.collect()
-    //SUMMARIZE_REPORTS9(
-    //    kleborate_ec_sum,
-    //    "kleborate_escherichia"
-    //)
-
-    // LISSERO
-    LISSERO(
-        ch_lis
-    )
-    ch_versions = ch_versions.mix(LISSERO.out.versions)
-    lissero_sum = LISSERO.out.tsv.collect()
-    SUMMARIZE_REPORTS4(
-        lissero_sum,
-        "lissero"
-    )
-    PLOT_LISSERO(
-        SUMMARIZE_REPORTS4.out.summary
-    )
-
-    // MENINGOTYPE
-    MENINGOTYPE(
-        ch_nei
-    )
-    ch_versions = ch_versions.mix(MENINGOTYPE.out.versions)
-    meningo_sum = MENINGOTYPE.out.tsv.collect()
-    SUMMARIZE_REPORTS5(
-        meningo_sum,
-        "meningotype"
-    )
-    PLOT_MENINGOTYPE(
-        SUMMARIZE_REPORTS5.out.summary
-    )
-
-    // SISTR
-    SISTR(
-        ch_sal
-    )
-    ch_versions = ch_versions.mix(SISTR.out.versions)
-    sistr_sum = SISTR.out.tsv.collect()
-    SUMMARIZE_REPORTS6(
-        sistr_sum,
-        "sistr"
-    )
-    PLOT_SISTR(
-        SUMMARIZE_REPORTS6.out.summary
-    )
-
-    // SALTY
-    SALTY(
-        ch_mra
-    )
-    ch_versions = ch_versions.mix(SALTY.out.versions)
-    salty_sum = SALTY.out.lineage.collect()
-    SUMMARIZE_REPORTS7(
-        salty_sum,
-        "salty"
-    )
-    PLOT_SALTY(
-        SUMMARIZE_REPORTS7.out.summary
-    )
-
-    // SPATYPER
-    SPATYPER(
-        ch_mra,
-        [],
-        []
-    )
-    ch_versions = ch_versions.mix(SPATYPER.out.versions)
-    spatyper_sum = SPATYPER.out.tsv.collect()
-    SUMMARIZE_REPORTS8(
-        spatyper_sum,
-        "spatyper"
-    )
-    PLOT_SPATYPER(
-        SUMMARIZE_REPORTS8.out.summary
-    )
+        AMRFINDERPLUS_UPDATE()
+        ch_versions = ch_versions.mix(AMRFINDERPLUS_UPDATE.out.versions)
 
 
-    //AMRFINDER + METAL + STRESS + STRESSFACTORS
-    AMRFINDERPLUS_RUN(
-        input_ch,
-        params.amrfinder_db
-    )
-    ch_versions = ch_versions.mix(AMRFINDERPLUS_RUN.out.versions)
-    PLOT_AMRFINDER(
-        AMRFINDERPLUS_RUN.out.report.collect(),
-        file(params.input)
-    )
+    }else{
+
+        //
+        // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+        //
+        INPUT_CHECK (
+            file(params.input)
+        )
+        ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+        input_ch = INPUT_CHECK.out.assembly
+
+        // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
+        // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+        // ! There is currently no tooling to help you write a sample sheet schema
+        // add items passed in from inputCsv samplesheet
+
+        BAKTA_BAKTA(
+            input_ch,
+            params.bakta_db,
+            [],
+            []
+        )
+        ch_versions = ch_versions.mix(BAKTA_BAKTA.out.versions)
+
+        PLOT_BAKTA(
+            BAKTA_BAKTA.out.txt.collect(),
+            file(params.input)
+        )
+
+        // seperate channel for different species to run typing tools
+        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_gonorrhoeae" }.set { ch_neg }
+        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_meningitidis" }.set { ch_nei }
+        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Listeria_monocytogenes" }.set { ch_lis }
+        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Klebsiella_pneumoniae" }.set { ch_kp }
+        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Escherichia_coli" }.set { ch_ec }
+        input_ch.filter { meta, fasta -> meta.genus=="Salmonella" }.set { ch_sal }
+        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Staphylococcus_aureus" }.set { ch_mra }
+
+        // KLEBORATE
+        KLEBORATE(
+            ch_kp,
+            "kpsc"
+        )
+        ch_versions = ch_versions.mix(KLEBORATE.out.versions)
+        kleborate_sum = KLEBORATE.out.txt.collect()
+        SUMMARIZE_REPORTS1(
+            kleborate_sum,
+            "kleborate_kpsc"
+        )
+        PLOT_KLEBORATE(
+            SUMMARIZE_REPORTS1.out.summary
+        )
+
+        // NGMASTER
+        NGMASTER(
+            ch_neg,
+            params.ngmaster_db
+        )
+        ch_versions = ch_versions.mix(NGMASTER.out.versions)
+        ngmaster_sum = NGMASTER.out.tsv.collect()
+        SUMMARIZE_REPORTS2(
+            ngmaster_sum,
+            "ngmaster"
+        )
+        PLOT_NGMASTER(
+            SUMMARIZE_REPORTS2.out.summary
+        )
+
+        // ECTYPER
+        ECTYPER(
+            ch_ec
+        )
+        ch_versions = ch_versions.mix(ECTYPER.out.versions)
+        ectyper_sum = ECTYPER.out.tsv.collect()
+        SUMMARIZE_REPORTS3(
+            ectyper_sum,
+            "ectyper"
+        )
+        PLOT_ECTYPER(
+            SUMMARIZE_REPORTS3.out.summary
+        )
+        //KLEBORATE_EC(
+        //    ch_ec,
+        //    "escherichia"
+        //)
+        //kleborate_ec_sum = KLEBORATE_EC.out.txt.collect()
+        //SUMMARIZE_REPORTS9(
+        //    kleborate_ec_sum,
+        //    "kleborate_escherichia"
+        //)
+
+        // LISSERO
+        LISSERO(
+            ch_lis
+        )
+        ch_versions = ch_versions.mix(LISSERO.out.versions)
+        lissero_sum = LISSERO.out.tsv.collect()
+        SUMMARIZE_REPORTS4(
+            lissero_sum,
+            "lissero"
+        )
+        PLOT_LISSERO(
+            SUMMARIZE_REPORTS4.out.summary
+        )
+
+        // MENINGOTYPE
+        MENINGOTYPE(
+            ch_nei
+        )
+        ch_versions = ch_versions.mix(MENINGOTYPE.out.versions)
+        meningo_sum = MENINGOTYPE.out.tsv.collect()
+        SUMMARIZE_REPORTS5(
+            meningo_sum,
+            "meningotype"
+        )
+        PLOT_MENINGOTYPE(
+            SUMMARIZE_REPORTS5.out.summary
+        )
+
+        // SISTR
+        SISTR(
+            ch_sal
+        )
+        ch_versions = ch_versions.mix(SISTR.out.versions)
+        sistr_sum = SISTR.out.tsv.collect()
+        SUMMARIZE_REPORTS6(
+            sistr_sum,
+            "sistr"
+        )
+        PLOT_SISTR(
+            SUMMARIZE_REPORTS6.out.summary
+        )
+
+        // SALTY
+        SALTY(
+            ch_mra
+        )
+        ch_versions = ch_versions.mix(SALTY.out.versions)
+        salty_sum = SALTY.out.lineage.collect()
+        SUMMARIZE_REPORTS7(
+            salty_sum,
+            "salty"
+        )
+        PLOT_SALTY(
+            SUMMARIZE_REPORTS7.out.summary
+        )
+
+        // SPATYPER
+        SPATYPER(
+            ch_mra,
+            [],
+            []
+        )
+        ch_versions = ch_versions.mix(SPATYPER.out.versions)
+        spatyper_sum = SPATYPER.out.tsv.collect()
+        SUMMARIZE_REPORTS8(
+            spatyper_sum,
+            "spatyper"
+        )
+        PLOT_SPATYPER(
+            SUMMARIZE_REPORTS8.out.summary
+        )
+
+
+        //AMRFINDER + METAL + STRESS + STRESSFACTORS
+        AMRFINDERPLUS_RUN(
+            input_ch,
+            params.amrfinder_db
+        )
+        ch_versions = ch_versions.mix(AMRFINDERPLUS_RUN.out.versions)
+        PLOT_AMRFINDER(
+            AMRFINDERPLUS_RUN.out.report.collect(),
+            file(params.input)
+        )
+    }
 
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

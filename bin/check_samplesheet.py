@@ -107,14 +107,12 @@ class RowChecker:
         number of times the same sample exist, but with different FASTQ files, e.g., multiple runs per experiment.
 
         """
-        if len(self._seen) != len(self.modified):
-            #raise AssertionError("The pair of sample name and FASTQ must be unique.")
-            raise AssertionError("Samplename must be unique.")
         seen = Counter()
         for row in self.modified:
             sample = row[self._sample_col]
             seen[sample] += 1
-            #row[self._sample_col] = f"{sample}_T{seen[sample]}"
+            if seen[sample] > 1:
+                raise AssertionError("Samplename must be unique - sample %s is listed more than once in the samplesheet."%(sample))
 
 
 def read_head(handle, num_lines=10):
