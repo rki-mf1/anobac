@@ -28,7 +28,7 @@
    5. [ngmaster](https://github.com/MDU-PHL/ngmaster) → Neisseria gonorrhoeae
    6. [ectyper](https://github.com/phac-nml/ecoli_serotyping) → E. coli
    7. [SaLTy](https://github.com/LanLab/salty) & [spaTyper](https://github.com/HCGB-IGTP/spaTyper) → Staphylococcus aureus
-3. [amrfinderplus](https://github.com/ncbi/amr)
+3. AMR & Virulence prediction using [AMRFinderPlus](https://github.com/ncbi/amr)
 
 <p align="center"><picture><img src="assets/AnoBac_workflow.png" alt="GARI"></picture></p>
 
@@ -67,7 +67,7 @@ The pipeline needs a few input parameters to be defined. This can be done either
 input: '/path/to/input/samplesheet.csv'
 outdir: '/path/to/output_directory'
 bakta_db: '/path/to/bakta_database'
-amrfinder_db: '/path/to/amrfinder_databaset'
+amrfinder_db: '/path/to/amrfinderplus_database'
 ```
 
 The additional flags in the command e.g. "-profile" will define how the pipeline is executed e.g. singularity, conda, mamba or docker (we recommend using singularity, if available).
@@ -81,18 +81,18 @@ When executing the pipeline on a HPC with a queuing system you might want to lim
 | input | YES | path to input samplesheet in csv format (more detailed explanation below) | string | null |
 | outdir | YES | path to output directory | string | null |
 | bakta_db | YES | path to predownloaded BAKTA database to use for annotation | string | null |
-| amrfinder_db | YES | path to predownloaded amrfinder database | string | null |
+| amrfinder_db | YES | path to predownloaded AMRFinderPlus database | string | null |
 | ngmaster_db | NO | path to predownloaded ngmaster database | string | [] |
-| setup_dbs | NO | set to true to donly download bakta and amrfinderplus databases (no analysis is performed) | boolean | false |
+| setup_dbs | NO | set to true to donly download bakta and AMRFinderPlus databases (no analysis is performed) | boolean | false |
 | tmp_dir | NO | path to temp directory (used for some processes) | string | /tmp/ |
 | publish_dir_mode | NO |---| string | 'copy' |
 
 ### Detailed walkthrough
 
 #### Database setup
-To run AnoBac a local copy of a BAKTA and amrfinder database are required. This can be done directly with AnoBac by setting the **setup_dbs** parameter to true. In this case only the databases will be downloaded and no further analysis is perfomed. Since especially the BAKTA database is quite big (and takes long to download) this is kept as a separate process from the analysis to avoid redownloading. So ideally this is run as a one time setup and the databases can be reused later on.
+To run AnoBac a local copy of a BAKTA and AMRFinderPlus database are required. This can be done directly with AnoBac by setting the **setup_dbs** parameter to true. In this case only the databases will be downloaded and no further analysis is perfomed. Since especially the BAKTA database is quite big (and takes long to download) this is kept as a separate process from the analysis to avoid redownloading. So ideally this is run as a one time setup and the databases can be reused later on.
 
-NOTE since (currently) the other inputs (input, output, bakta_db, amrfinder_db) are mandatory you would also need to specify some value even if no analysis is performed. While the parameters bakta_db and amrfinder_db can be filled with random placeholders the input samplesheet needs to be a file that exists (even though the content does not matter for the database download).
+**NOTE** since (currently) the other inputs (input, output, bakta_db, amrfinder_db) are mandatory you would also need to specify some value even if no analysis is performed. While the parameters bakta_db and amrfinder_db can be filled with random placeholders the input samplesheet needs to be a file that exists (even though the content does not matter for the database download).
 
 Here is a minimum example of a params file with the required parameters to download the databases:
 
