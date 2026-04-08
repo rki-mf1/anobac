@@ -126,14 +126,20 @@ workflow ANOBAC {
             file(params.input)
         )
 
+        def kpsc_species = [
+            "Klebsiella_africana", "Klebsiella_pneumoniae",
+            "Klebsiella_quasipneumoniae", "Klebsiella_quasivariicola", 
+            "Klebsiella_variicola"
+        ]
+
         // seperate channel for different species to run typing tools
-        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_gonorrhoeae" }.set { ch_neg }
-        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_meningitidis" }.set { ch_nei }
-        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Listeria_monocytogenes" }.set { ch_lis }
-        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Klebsiella_pneumoniae" }.set { ch_kp }
-        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Escherichia_coli" }.set { ch_ec }
-        input_ch.filter { meta, fasta -> meta.genus=="Salmonella" }.set { ch_sal }
-        input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Staphylococcus_aureus" }.set { ch_mra }
+        def ch_neg = input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_gonorrhoeae" }
+        def ch_nei = input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Neisseria_meningitidis" }
+        def ch_lis = input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Listeria_monocytogenes" }
+        def ch_ec = input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Escherichia_coli" }
+        def ch_sal = input_ch.filter { meta, fasta -> meta.genus=="Salmonella" }
+        def ch_mra = input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species=="Staphylococcus_aureus" }
+        def ch_kp = input_ch.filter { meta, fasta -> meta.genus+"_"+meta.species in kpsc_species }
 
         // KLEBORATE
         KLEBORATE(
