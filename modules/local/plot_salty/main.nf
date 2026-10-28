@@ -3,8 +3,8 @@ process PLOT_SALTY {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'library://bajicv/r/anobac_plot:v0.0.2' :
-        'library://bajicv/r/anobac_plot:v0.0.2' }"
+        'oras://community.wave.seqera.io/library/r-base_r-tidyverse_r-optparse_r-ggnewscale_r-ggpubr:0a8a030267d4e59b' :
+        'oras://community.wave.seqera.io/library/r-base_r-tidyverse_r-optparse_r-ggnewscale_r-ggpubr:0a8a030267d4e59b' }"
 
     input:
     file(salty_csv)
