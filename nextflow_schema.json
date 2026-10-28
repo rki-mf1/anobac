@@ -53,7 +53,7 @@
                 "setup_dbs": {
                     "type": "boolean",
                     "default": "false",
-                    "description": "tmp to use for some processes",
+                    "description": "set to true to setup databases (no analysis will be run)",
                     "fa_icon": "fas fa-file-csv"
                 }
             }
