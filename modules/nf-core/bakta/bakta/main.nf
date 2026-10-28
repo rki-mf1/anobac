@@ -4,8 +4,8 @@ process BAKTA_BAKTA {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bakta:1.11.3--pyhdfd78af_0' :
-        'biocontainers/bakta:1.11.3--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/bakta:1.12.1--pyhdfd78af_0' :
+        'biocontainers/bakta:1.12.1--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(fasta)
@@ -16,8 +16,8 @@ process BAKTA_BAKTA {
     output:
     //tuple val(meta), path("${prefix}.embl")             , emit: embl
     //tuple val(meta), path("${prefix}.faa")              , emit: faa
-    //tuple val(meta), path("${prefix}.ffn")              , emit: ffn
-    //tuple val(meta), path("${prefix}.fna")              , emit: fna
+    tuple val(meta), path("${prefix}.ffn")              , emit: ffn
+    tuple val(meta), path("${prefix}.fna")              , emit: fna
     tuple val(meta), path("${prefix}.gbff")             , emit: gbff
     tuple val(meta), path("${prefix}.gff3")             , emit: gff
     //tuple val(meta), path("${prefix}.hypotheticals.tsv"), emit: hypotheticals_tsv
